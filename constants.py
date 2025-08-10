@@ -6,7 +6,9 @@
 # ライブラリの読み込み
 ############################################################
 from langchain_community.document_loaders import PyMuPDFLoader, Docx2txtLoader, TextLoader
-from langchain_community.document_loaders.csv_loader import CSVLoader
+from langchain_core.documents import Document
+import pandas as pd
+import json
 
 
 ############################################################
@@ -47,10 +49,16 @@ TEMPERATURE = 0.5
 # RAG参照用のデータソース系
 # ==========================================
 RAG_TOP_FOLDER_PATH = "./data"
+def custom_csv_loader(path):
+    df = pd.read_csv(path, encoding="utf-8")
+    data = df.to_dict('records')
+    return [Document(page_content=json.dumps(data, ensure_ascii=False), metadata={"source": path})]
+
 SUPPORTED_EXTENSIONS = {
     ".pdf": PyMuPDFLoader,
     ".docx": Docx2txtLoader,
-    ".csv": lambda path: CSVLoader(path, encoding="utf-8")
+    ".csv": custom_csv_loader,
+    ".txt": lambda path: TextLoader(path, encoding="utf-8"),
 }
 WEB_URL_LOAD_TARGETS = [
     "https://generative-ai.web-camp.io/"

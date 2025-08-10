@@ -129,7 +129,7 @@ if chat_message:
             # ==========================================
             if st.session_state.mode == ct.ANSWER_MODE_1:
                 # 入力内容と関連性が高い社内文書のありかを表示
-                content = cn.display_search_llm_response(llm_response)
+                content = cn.display_search_llm_response(llm_response, chat_message)
 
             # ==========================================
             # モードが「社内問い合わせ」の場合

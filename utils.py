@@ -15,7 +15,9 @@ from langchain.chains import create_history_aware_retriever, create_retrieval_ch
 from langchain.chains.combine_documents import create_stuff_documents_chain
 import constants as ct
 
-
+# OpenAI APIキーの取得
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ############################################################
 # 設定関連
 ############################################################

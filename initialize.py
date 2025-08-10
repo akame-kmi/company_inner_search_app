@@ -27,7 +27,11 @@ import constants as ct
 # 「.env」ファイルで定義した環境変数の読み込み
 load_dotenv()
 
-
+# OpenAI APIキーの取り込み
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise KeyError("OPENAI_API_KEY is not set in .env file. Please add it to your .env.")
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 ############################################################
 # 関数定義
 ############################################################
@@ -122,10 +126,13 @@ def initialize_retriever():
     embeddings = OpenAIEmbeddings()
     
     # チャンク分割用のオブジェクトを作成
+    chunk_size = 500
+    chunk_overlap = 50
+    separator = "\n"
     text_splitter = CharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=50,
-        separator="\n"
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separator=separator
     )
 
     # チャンク分割を実施
@@ -135,7 +142,8 @@ def initialize_retriever():
     db = Chroma.from_documents(splitted_docs, embedding=embeddings)
 
     # ベクターストアを検索するRetrieverの作成
-    st.session_state.retriever = db.as_retriever(search_kwargs={"k": 3})
+    k_num = 5
+    st.session_state.retriever = db.as_retriever(search_kwargs={"k": k_num})
 
 
 def initialize_session_state():
@@ -196,7 +204,33 @@ def recursive_file_check(path, docs_all):
             recursive_file_check(full_path, docs_all)
     else:
         # パスがファイルの場合、ファイル読み込み
-        file_load(path, docs_all)
+        file_load_with_pdf_page(path, docs_all)
+
+
+def file_load_with_pdf_page(path, docs_all):
+    """
+    ファイル内のデータ読み込み（PDFの場合はページ番号もmetadataに追加）
+
+    Args:
+        path: ファイルパス
+        docs_all: データソースを格納する用のリスト
+    """
+    file_extension = os.path.splitext(path)[1]
+    file_name = os.path.basename(path)
+
+    if file_extension in ct.SUPPORTED_EXTENSIONS:
+        loader_or_docs = ct.SUPPORTED_EXTENSIONS[file_extension](path)
+        if hasattr(loader_or_docs, "load"):
+            docs = loader_or_docs.load()
+        else:
+            docs = loader_or_docs
+        # PDFの場合はページ番号をmetadataに追加
+        if file_extension.lower() == ".pdf":
+            for i, doc in enumerate(docs):
+                # ページ番号は1始まりで追加
+                doc.metadata["page_number"] = i + 1
+                doc.metadata["file_path"] = path
+        docs_all.extend(docs)
 
 
 def file_load(path, docs_all):
