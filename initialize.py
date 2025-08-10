@@ -27,11 +27,15 @@ import constants as ct
 # 「.env」ファイルで定義した環境変数の読み込み
 load_dotenv()
 
+<<<<<<< HEAD
 # OpenAI APIキーの取り込み
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise KeyError("OPENAI_API_KEY is not set in .env file. Please add it to your .env.")
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+=======
+
+>>>>>>> 145007e6cad6ed3a8106f979965fe31ca93a7ec0
 ############################################################
 # 関数定義
 ############################################################
@@ -126,6 +130,7 @@ def initialize_retriever():
     embeddings = OpenAIEmbeddings()
     
     # チャンク分割用のオブジェクトを作成
+<<<<<<< HEAD
     chunk_size = 500
     chunk_overlap = 50
     separator = "\n"
@@ -133,6 +138,12 @@ def initialize_retriever():
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         separator=separator
+=======
+    text_splitter = CharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50,
+        separator="\n"
+>>>>>>> 145007e6cad6ed3a8106f979965fe31ca93a7ec0
     )
 
     # チャンク分割を実施
@@ -142,8 +153,12 @@ def initialize_retriever():
     db = Chroma.from_documents(splitted_docs, embedding=embeddings)
 
     # ベクターストアを検索するRetrieverの作成
+<<<<<<< HEAD
     k_num = 5
     st.session_state.retriever = db.as_retriever(search_kwargs={"k": k_num})
+=======
+    st.session_state.retriever = db.as_retriever(search_kwargs={"k": 3})
+>>>>>>> 145007e6cad6ed3a8106f979965fe31ca93a7ec0
 
 
 def initialize_session_state():
@@ -204,6 +219,7 @@ def recursive_file_check(path, docs_all):
             recursive_file_check(full_path, docs_all)
     else:
         # パスがファイルの場合、ファイル読み込み
+<<<<<<< HEAD
         file_load_with_pdf_page(path, docs_all)
 
 
@@ -231,6 +247,9 @@ def file_load_with_pdf_page(path, docs_all):
                 doc.metadata["page_number"] = i + 1
                 doc.metadata["file_path"] = path
         docs_all.extend(docs)
+=======
+        file_load(path, docs_all)
+>>>>>>> 145007e6cad6ed3a8106f979965fe31ca93a7ec0
 
 
 def file_load(path, docs_all):
